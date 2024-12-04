@@ -1,0 +1,43 @@
+name: UserService Docker
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Fetch secrets from Vault
+      env:
+        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+        VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      run: |
+        apk add --no-cache curl jq
+        MONGO_USERNAME=$(curl -X GET -H "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/secret/data/mongodb?version=2 | jq -r '.data.data.username')
+        MONGO_PASSWORD=$(curl -X GET -H "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/secret/data/mongodb?version=2 | jq -r '.data.data.password')
+        echo "MONGO_USERNAME=$MONGO_USERNAME" >> $GITHUB_OUTPUT
+        echo "MONGO_PASSWORD=$MONGO_PASSWORD" >> $GITHUB_OUTPUT
+
+    - name: Build and push UserService
+      env:
+        MONGO_USERNAME: ${{ env.MONGO_USERNAME }}
+        MONGO_PASSWORD: ${{ env.MONGO_PASSWORD }}
+      run: |
+        docker build . -f UserService/Dockerfile -t ${DOCKER_USERNAME}/userservice:latest
+        docker push ${DOCKER_USERNAME}/userservice:latest
