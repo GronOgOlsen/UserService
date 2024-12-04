@@ -1,30 +1,17 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+# Base image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+# Build image
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["UserService/UserService.csproj", "UserService/"]
-RUN dotnet restore "UserService/UserService.csproj"
 COPY . .
-WORKDIR "/src/UserService"
-RUN dotnet build "UserService.csproj" -c Release -o /app/build
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app
 
-FROM build AS publish
-RUN dotnet publish "UserService.csproj" -c Release -o /app/publish
-
+# Final image
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-
-# Fetch secrets from Vault
-ENV VAULT_ADDR=$VAULT_ADDR
-ENV VAULT_TOKEN=$VAULT_TOKEN
-RUN apk add --no-cache curl jq
-RUN MONGO_USERNAME=$(curl -X GET -H "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/secret/data/mongodb?version=2 | jq -r '.data.data.username') \
-    && MONGO_PASSWORD=$(curl -X GET -H "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/secret/data/mongodb?version=2 | jq -r '.data.data.password') \
-    && echo "MONGO_USERNAME=$MONGO_USERNAME" >> /app/env.list \
-    && echo "MONGO_PASSWORD=$MONGO_PASSWORD" >> /app/env.list
-
-ENTRYPOINT ["dotnet", "UserService.dll"]
+COPY --from=build /app .
+ENTRYPOINT ["dotnet", "UserServiceAPI.dll"]
