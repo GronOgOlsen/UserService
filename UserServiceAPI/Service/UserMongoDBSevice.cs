@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 
-namespace UserServiceAPI.Service
+namespace UserServiceAPI.Models
 {
     public interface IUserInterface
     {
