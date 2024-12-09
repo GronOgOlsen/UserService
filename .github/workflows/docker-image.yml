@@ -18,7 +18,7 @@ jobs:
       id-token: write
     env:
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
-      IMAGE_NAME: user-service
+      IMAGE_NAME: user-services
       IMAGE_VERSION: 1.0.0
     steps:
       - uses: actions/checkout@v4
