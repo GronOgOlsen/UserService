@@ -32,44 +32,57 @@ try
 
     var vaultService = new VaultService(configuration);
 
-    string mySecret = await vaultService.GetSecretAsync("secrets", "SecretKey") ?? "5Jw9yT4fb9T5XrwKUz23QzA5D9BuY3p6";
-    string myIssuer = await vaultService.GetSecretAsync("secrets", "IssuerKey") ?? "gAdDxQDQq7UYNxF3F8pLjVmGuU5u8g3y";
-    string myConnectionString = await vaultService.GetSecretAsync("secrets", "MongoConnectionString") ?? "mongodb://admin:1234@mongodb:27017";
+    string mySecret = await vaultService.GetSecretAsync("secrets", "SecretKey")
+        ?? throw new Exception("Failed to retrieve 'SecretKey' from Vault.");
+
+    string myIssuer = await vaultService.GetSecretAsync("secrets", "IssuerKey")
+        ?? throw new Exception("Failed to retrieve 'IssuerKey' from Vault.");
+
+    string myConnectionString = await vaultService.GetSecretAsync("secrets", "MongoConnectionString")
+        ?? throw new Exception("Failed to retrieve 'MongoConnectionString' from Vault.");
+
+    configuration["SecretKey"] = mySecret;
+    configuration["IssuerKey"] = myIssuer;
+    configuration["MongoConnectionString"] = myConnectionString;
+
+    Console.WriteLine("Issuer: " + myIssuer);
+    Console.WriteLine("Secret: " + mySecret);
+    Console.WriteLine("MongoConnectionString: " + myConnectionString);
 
     configuration["MongoConnectionString"] = myConnectionString;
 
-     builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = myIssuer,
-            ValidAudience = "http://localhost",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(mySecret)),
-            ClockSkew = TimeSpan.Zero 
-        };
+    builder.Services.AddAuthentication(options =>
+   {
+       options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+       options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+   })
+   .AddJwtBearer(options =>
+   {
+       options.TokenValidationParameters = new TokenValidationParameters()
+       {
+           ValidateIssuer = true,
+           ValidateAudience = true,
+           ValidateLifetime = true,
+           ValidateIssuerSigningKey = true,
+           ValidIssuer = myIssuer,
+           ValidAudience = "http://localhost",
+           IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(mySecret)),
+           ClockSkew = TimeSpan.Zero
+       };
 
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
-            {
-                if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-                {
-                    context.Response.Headers.Add("Token-Expired", "true");
-                    logger.Error("Token expired: {0}", context.Exception.Message);
-                }
-                return Task.CompletedTask;
-            }
-        };
-    });
+       options.Events = new JwtBearerEvents
+       {
+           OnAuthenticationFailed = context =>
+           {
+               if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+               {
+                   context.Response.Headers.Add("Token-Expired", "true");
+                   logger.Error("Token expired: {0}", context.Exception.Message);
+               }
+               return Task.CompletedTask;
+           }
+       };
+   });
 
     builder.Services.AddAuthorization(options =>
     {
@@ -79,14 +92,14 @@ try
 
     });
 
-    builder.Services.AddCors(options => 
+    builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowOrigin", builder =>
         {
             builder.AllowAnyHeader()
                 .AllowAnyMethod();
         });
-            
+
     });
 
     builder.Services.AddEndpointsApiExplorer();

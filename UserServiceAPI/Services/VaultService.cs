@@ -37,31 +37,6 @@ namespace UserServiceAPI.Services
             _vaultClient = new VaultClient(vaultClientSettings);
         }
 
-        public async Task<string?> GetConnectionStringAsync(string path, string key)
-        {
-            try
-            {
-                var secret = await _vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: path, mountPoint: "secret");
-
-                if (secret != null && secret.Data != null && secret.Data.Data != null && secret.Data.Data.ContainsKey(key))
-                {
-                    return secret.Data.Data[key].ToString();
-                }
-                else
-                {
-                    throw new Exception($"Secret with key '{key}' was not found in path '{path}'.");
-                }
-            }
-            catch (VaultApiException ex)
-            {
-                throw new Exception($"Error when retreiving secret from vault: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                return null + "fejl ved hentning af conn string";
-            }
-        }
-
         public async Task<string?> GetSecretAsync(string path, string key)
         {
             try

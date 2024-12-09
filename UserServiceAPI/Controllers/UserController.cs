@@ -27,12 +27,14 @@ namespace UserServiceAPI.Controllers
             _userService = userService;
             _logger = logger;
 
+            // Log the IP address of the user service
             var hostName = System.Net.Dns.GetHostName();
             var ips = System.Net.Dns.GetHostAddresses(hostName);
             var _ipaddr = ips.First().MapToIPv4().ToString();
             _logger.LogInformation(1, $"User service responding from {_ipaddr}");
         }
 
+        // GET: /api/user/{userID}        
         [HttpGet("{userID}")]
         [Authorize(Roles = "2")]
         public async Task<ActionResult<User>> GetUser(Guid userID)
@@ -47,6 +49,7 @@ namespace UserServiceAPI.Controllers
             return user;
         }
 
+        // GET: /api/user
         [HttpGet]
         [Authorize(Roles = "2")]
         public async Task<ActionResult<IEnumerable<User>>> GetUserList()
@@ -61,6 +64,7 @@ namespace UserServiceAPI.Controllers
             return Ok(userList);
         }
 
+        // POST: /api/user
         [HttpPost]
         public async Task<ActionResult<Guid>> AddUser(User user)
         {
@@ -70,6 +74,7 @@ namespace UserServiceAPI.Controllers
             return Ok($"User with id {userID} added successfully");
         }
 
+        // PUT: /api/user/{_id}
         [HttpPut("{_id}")]
         [Authorize(Roles = "2")]
         public async Task<IActionResult> UpdateUser(Guid _id, User user)
@@ -92,6 +97,7 @@ namespace UserServiceAPI.Controllers
             return Ok($"User with id {_id} updated successfully");
         }
 
+        // DELETE: /api/user
         [HttpDelete("{user_id}")]
         [Authorize(Roles = "2")]
         public async Task<IActionResult> DeleteUser(Guid user_id)
@@ -108,6 +114,8 @@ namespace UserServiceAPI.Controllers
             return Ok("user deleted successfully");
         }
 
+        // POST: /api/user/validate
+        // Validere en bruger, metoden bruges i AuthServiceAPI til at logge en bruger ind
         [HttpPost("validate")]
         public async Task<ActionResult<User>> ValidateUser([FromBody] LoginDTO user)
         {
@@ -121,27 +129,5 @@ namespace UserServiceAPI.Controllers
             }
             return Ok(usr);  
         }
-    [HttpGet("/api/legal/users/{userId}")]
-    [Authorize(Roles = "3")]
-    public async Task<ActionResult<User>> GetUserById(Guid userId)
-    {
-        _logger.LogInformation("Getting user with ID: {UserID}", userId);
-        var user = await _userService.GetUser(userId);
-        if (user == null)
-        {
-            _logger.LogWarning("User with ID: {UserID} not found", userId);
-            return NotFound(new { error = "User not found" });
-        }
-
-        var response = new
-        {
-            Id = user._id,
-            Username = user.username,
-            Email = user.email,
-            RegistrationDate = user.created_at // assuming CreatedAt is the registration date
-        };
-
-        return Ok(response);
-    }
     }
 }

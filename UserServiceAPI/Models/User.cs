@@ -11,7 +11,7 @@ namespace UserServiceAPI.Models
         public string? lastName { get; set; }
         public string? email { get; set; }
 
-        public string? adress { get; set; }
+        public string? address { get; set; }
 
         public string? telephonenumber { get; set; }
 
