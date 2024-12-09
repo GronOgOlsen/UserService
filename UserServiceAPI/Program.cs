@@ -82,8 +82,6 @@ try
     {
         options.AddPolicy("UserRolePolicy", policy => policy.RequireRole("1"));
         options.AddPolicy("AdminRolePolicy", policy => policy.RequireRole("2"));
-        options.AddPolicy("LegalRolePolicy", policy => policy.RequireRole("3"));
-
     });
 
     builder.Services.AddCors(options => 
