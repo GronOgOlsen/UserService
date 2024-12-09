@@ -20,7 +20,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 
-
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings()
     .GetCurrentClassLogger();
 logger.Debug("init main");
@@ -32,19 +31,19 @@ try
 
     var vaultService = new VaultService(configuration);
 
+    // Get secrets from the vault, and set as local variables
     string mySecret = await vaultService.GetSecretAsync("secrets", "SecretKey") ?? "????";
     string myIssuer = await vaultService.GetSecretAsync("secrets", "IssuerKey") ?? "????";
     string myConnectionString = await vaultService.GetSecretAsync("secrets", "MongoConnectionString") ?? "????";
 
+    // Set secrets, issuer and connection string in the configuration
     configuration["SecretKey"] = mySecret;
     configuration["IssuerKey"] = myIssuer;
     configuration["MongoConnectionString"] = myConnectionString;
 
-    Console.WriteLine("Issuer: " + myIssuer);
+    Console.WriteLine("Issuer:) " + myIssuer);
     Console.WriteLine("Secret: " + mySecret);
     Console.WriteLine("MongoConnectionString: " + myConnectionString);
-
-    configuration["MongoConnectionString"] = myConnectionString;
 
      builder.Services.AddAuthentication(options =>
     {
