@@ -1,19 +1,13 @@
-using UserServiceAPI.Service;
+using UserServiceAPI.Services;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using UserServiceAPI.Models;
+using UserServiceAPI.Data;
+using UserServiceAPI.Interfaces;
 
 
-namespace UserServiceAPI.Models
+namespace UserServiceAPI.Services
 {
-    public interface IUserInterface
-    {
-        Task<User?> GetUser(Guid _id);
-        Task<IEnumerable<User>?> GetUserList();
-        Task<Guid> AddUser(User user);
-        Task<long> UpdateUser(User user);
-        Task<long> DeleteUser(Guid _id);
-        Task<User> ValidateUser(string username, string password);
-    }
     public class UserMongoDBService : IUserInterface
     {
         private readonly ILogger<UserMongoDBService> _logger;

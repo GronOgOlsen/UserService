@@ -8,7 +8,7 @@ using VaultSharp.V1.Commons;
 using Microsoft.Extensions.Configuration;
 using VaultSharp.Core;
 
-namespace UserServiceAPI
+namespace UserServiceAPI.Services
 {
     public class VaultService
     {
