@@ -5,7 +5,8 @@ namespace UserServiceAPI.Models
     public class User
     {
         [BsonId]
-        public Guid _id { get; set; }
+        [BsonRepresentation(BsonType.String)] // Gem Guid som string i MongoDB
+        public Guid _id { get; set; } = Guid.NewGuid(); 
         public string? firstName { get; set; }
 
         public string? lastName { get; set; }

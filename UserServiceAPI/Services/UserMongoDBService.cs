@@ -39,7 +39,6 @@ namespace UserServiceAPI.Services
 
         public async Task<Guid> AddUser(User user)
         {
-            user._id = Guid.NewGuid();
             await _userCollection.InsertOneAsync(user);
             return user._id;
         }
