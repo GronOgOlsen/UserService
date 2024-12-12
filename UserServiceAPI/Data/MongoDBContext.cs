@@ -40,10 +40,30 @@ namespace UserServiceAPI.Data
             {
                 iLogger.LogInformation("Seeding initial user data...");
 
-                var users = new List<User>
+               var users = new List<User>
                 {
-                    new User { username = "testadmin", password = "admin123", Salt = "" },
-                    new User { username = "testuser", password = "password123", Salt = "" }
+                    new User {
+                        username = "testadmin",
+                        password = "admin123",
+                        Salt = "",
+                        firstName = "Admin",
+                        lastName = "User",
+                        email = "admin@example.com",
+                        address = "123 Admin Street",
+                        telephonenumber = "1234567890",
+                        role = 1
+                    },
+                    new User {
+                        username = "testuser",
+                        password = "password123",
+                        Salt = "",
+                        firstName = "Test",
+                        lastName = "User",
+                        email = "test@example.com",
+                        address = "456 Test Avenue",
+                        telephonenumber = "0987654321",
+                        role = 2
+                    }
                 };
 
                 foreach (var user in users)
