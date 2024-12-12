@@ -5,7 +5,6 @@ using UserServiceAPI.Models;
 using UserServiceAPI.Data;
 using UserServiceAPI.Interfaces;
 
-
 namespace UserServiceAPI.Services
 {
     public class UserMongoDBService : IUserInterface
@@ -39,6 +38,9 @@ namespace UserServiceAPI.Services
 
         public async Task<Guid> AddUser(User user)
         {
+            var (hash, salt) = PasswordHelper.HashPassword(user.password);
+            user.password = hash;
+            user.Salt = salt;
             await _userCollection.InsertOneAsync(user);
             return user._id;
         }
@@ -56,12 +58,19 @@ namespace UserServiceAPI.Services
             var result = await _userCollection.DeleteOneAsync(filter);
             return result.DeletedCount;
         }
-        public async Task<User> ValidateUser(string username, string password)
+
+        public async Task<User?> ValidateUser(string username, string password)
         {
             _logger.LogInformation($"Validating user with username: {username}", username);
-            var filter = Builders<User>.Filter.Eq(x => x.username, username) &
-                         Builders<User>.Filter.Eq(x => x.password, password);
-            return await _userCollection.Find(filter).FirstOrDefaultAsync();
+            var filter = Builders<User>.Filter.Eq(x => x.username, username);
+            var user = await _userCollection.Find(filter).FirstOrDefaultAsync();
+
+            if (user != null && PasswordHelper.VerifyPassword(password, user.password, user.Salt))
+            {
+                return user;
+            }
+
+            return null;
         }
     }
 }

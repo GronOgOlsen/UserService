@@ -12,6 +12,6 @@ namespace UserServiceAPI.Interfaces
         Task<Guid> AddUser(User user);
         Task<long> UpdateUser(User user);
         Task<long> DeleteUser(Guid _id);
-        Task<User> ValidateUser(string username, string password);
+        Task<User>? ValidateUser(string username, string password);
     }
 }

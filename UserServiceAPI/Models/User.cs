@@ -24,5 +24,7 @@ namespace UserServiceAPI.Models
         public string? password { get; set; } 
 
         public DateTime? created_at { get; set; } = DateTime.Now;
+
+        public string? Salt { get; set; }
     }
 }

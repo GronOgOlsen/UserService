@@ -39,9 +39,8 @@ try
     configuration["IssuerKey"] = myIssuer;
     configuration["MongoConnectionString"] = myConnectionString;
 
-    Console.WriteLine($"Issuer: {myIssuer}");
-    Console.WriteLine($"Secret: {mySecret}");
-    Console.WriteLine($"MongoConnectionString: {myConnectionString}");
+    logger.Info($"Issuer: {myIssuer}");
+    logger.Info($"MongoConnectionString: {myConnectionString}");
 
     // Authentication & Authorization Configuration
     builder.Services.AddAuthentication(options =>
@@ -124,6 +123,14 @@ try
     app.UseCors("AllowOrigin"); // Enable CORS
     app.UseAuthentication(); // Enable Authentication
     app.UseAuthorization(); // Enable Authorization
+
+    // Seed database during startup
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<MongoDBContext>();
+        var contextLogger = scope.ServiceProvider.GetRequiredService<ILogger<MongoDBContext>>(); // Henter en ASP.NET Core logger, fordi MongoDB ikke er kompatibel med NLog åbenbart? ChatGPT siger det her
+        await context.SeedDataAsync(contextLogger); // Brug loggeren til seeding
+    }
 
     app.MapControllers(); // Map Controllers
     app.Run(); // Run the application
