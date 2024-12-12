@@ -32,7 +32,7 @@ namespace UserServiceAPI.Data
 
         public async Task SeedDataAsync(ILogger<MongoDBContext> iLogger)
         {
-            var userCollection = GetCollection<User>("Users");
+            var userCollection = GetCollection<User>("User");
 
             // Check if any users exist
             var userExists = await userCollection.Find(_ => true).AnyAsync();
