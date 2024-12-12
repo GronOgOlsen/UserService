@@ -14,11 +14,9 @@ using UserServiceAPI.Interfaces;
 using UserServiceAPI.Data;
 using NLog;
 using NLog.Web;
-using UserServiceAPI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings()
     .GetCurrentClassLogger();
@@ -29,23 +27,24 @@ try
     var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
 
+    // Vault Setup: Retrieve secrets
     var vaultService = new VaultService(configuration);
 
-    // Get secrets from the vault, and set as local variables
     string mySecret = await vaultService.GetSecretAsync("secrets", "SecretKey") ?? "????";
     string myIssuer = await vaultService.GetSecretAsync("secrets", "IssuerKey") ?? "????";
     string myConnectionString = await vaultService.GetSecretAsync("secrets", "MongoConnectionString") ?? "????";
 
-    // Set secrets, issuer and connection string in the configuration
+    // Add retrieved secrets to the configuration
     configuration["SecretKey"] = mySecret;
     configuration["IssuerKey"] = myIssuer;
     configuration["MongoConnectionString"] = myConnectionString;
 
-    Console.WriteLine("Issuer: " + myIssuer);
-    Console.WriteLine("Secret: " + mySecret);
-    Console.WriteLine("MongoConnectionString: " + myConnectionString);
+    Console.WriteLine($"Issuer: {myIssuer}");
+    Console.WriteLine($"Secret: {mySecret}");
+    Console.WriteLine($"MongoConnectionString: {myConnectionString}");
 
-     builder.Services.AddAuthentication(options =>
+    // Authentication & Authorization Configuration
+    builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -61,9 +60,10 @@ try
             ValidIssuer = myIssuer,
             ValidAudience = "http://localhost",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(mySecret)),
-            ClockSkew = TimeSpan.Zero 
+            ClockSkew = TimeSpan.Zero // Disable default clock skew
         };
 
+        // Handle expired tokens
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = context =>
@@ -71,53 +71,62 @@ try
                 if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                 {
                     context.Response.Headers.Add("Token-Expired", "true");
-                    logger.Error("Token expired: {0}", context.Exception.Message);
+                    logger.Error($"Token expired: {context.Exception.Message}");
                 }
                 return Task.CompletedTask;
             }
         };
     });
 
+    // Authorization Policies
     builder.Services.AddAuthorization(options =>
     {
         options.AddPolicy("UserRolePolicy", policy => policy.RequireRole("1"));
         options.AddPolicy("AdminRolePolicy", policy => policy.RequireRole("2"));
     });
 
-    builder.Services.AddCors(options => 
+    // CORS Policy Configuration
+    builder.Services.AddCors(options =>
     {
-        options.AddPolicy("AllowOrigin", builder =>
+        options.AddPolicy("AllowOrigin", policyBuilder =>
         {
-            builder.AllowAnyHeader()
-                .AllowAnyMethod();
+            policyBuilder.AllowAnyHeader()
+                         .AllowAnyMethod();
         });
-            
     });
 
+    // Register Swagger for API documentation
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    builder.Services.AddControllers();
-    builder.Services.AddTransient<VaultService>();
-    builder.Services.AddSingleton<MongoDBContext>();
-    builder.Services.AddSingleton<IUserInterface, UserMongoDBService>();
 
+    // Register Controllers
+    builder.Services.AddControllers();
+
+    // Dependency Injection Configuration
+    builder.Services.AddTransient<VaultService>(); // Vault service
+    builder.Services.AddSingleton<MongoDBContext>(); // MongoDB context
+    builder.Services.AddSingleton<IUserInterface, UserMongoDBService>(); // User service
+
+    // Configure Logging
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
     var app = builder.Build();
 
+    // Middleware Pipeline Configuration
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
         app.UseSwaggerUI();
     }
 
-    app.MapControllers();
-    app.UseHttpsRedirection();
-    app.UseAuthentication();
-    app.UseAuthorization();
-    app.MapControllers();
-    app.Run();
+    app.UseHttpsRedirection(); // Redirect HTTP requests to HTTPS
+    app.UseCors("AllowOrigin"); // Enable CORS
+    app.UseAuthentication(); // Enable Authentication
+    app.UseAuthorization(); // Enable Authorization
+
+    app.MapControllers(); // Map Controllers
+    app.Run(); // Run the application
 }
 catch (Exception ex)
 {
