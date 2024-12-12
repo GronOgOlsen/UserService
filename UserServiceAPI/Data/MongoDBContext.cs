@@ -51,7 +51,7 @@ namespace UserServiceAPI.Data
                         email = "admin@example.com",
                         address = "123 Admin Street",
                         telephonenumber = "1234567890",
-                        role = 1
+                        role = 2
                     },
                     new User {
                         username = "testuser",
@@ -62,7 +62,7 @@ namespace UserServiceAPI.Data
                         email = "test@example.com",
                         address = "456 Test Avenue",
                         telephonenumber = "0987654321",
-                        role = 2
+                        role = 1
                     }
                 };
 
