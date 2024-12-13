@@ -39,9 +39,9 @@ try
     configuration["IssuerKey"] = myIssuer;
     configuration["MongoConnectionString"] = myConnectionString;
 
-    logger.Info($"Secret: {mySecret}");
-    logger.Info($"Issuer: {myIssuer}");
-    logger.Info($"MongoConnectionString: {myConnectionString}");
+    Console.WriteLine("Issuer: " + myIssuer);
+    Console.WriteLine("Secret: " + mySecret);
+    Console.WriteLine("MongoConnectionString: " + myConnectionString);
 
     // Authentication & Authorization Configuration
     builder.Services.AddAuthentication(options =>
