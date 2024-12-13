@@ -39,6 +39,7 @@ try
     configuration["IssuerKey"] = myIssuer;
     configuration["MongoConnectionString"] = myConnectionString;
 
+    logger.Info($"Secret: {mySecret}");
     logger.Info($"Issuer: {myIssuer}");
     logger.Info($"MongoConnectionString: {myConnectionString}");
 

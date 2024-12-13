@@ -27,7 +27,7 @@ namespace UserServiceAPI.Controllers
             _userService = userService;
             _logger = logger;
 
-            // Log the IP address of the user service
+            // Logger IP-adressen for tjenesten ved opstart.
             var hostName = System.Net.Dns.GetHostName();
             var ips = System.Net.Dns.GetHostAddresses(hostName);
             var _ipaddr = ips.First().MapToIPv4().ToString();
