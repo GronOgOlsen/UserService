@@ -1,0 +1,52 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "User",
+    "type": "object",
+    "properties": {
+      "_id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unik identifier i GUID-format."
+      },
+      "firstName": {
+        "type": "string",
+        "description": "Brugerens fornavn."
+      },
+      "lastName": {
+        "type": "string",
+        "description": "Brugerens efternavn."
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "description": "Brugerens e-mailadresse."
+      },
+      "address": {
+        "type": "string",
+        "description": "Brugerens adresse."
+      },
+      "telephonenumber": {
+        "type": "string",
+        "description": "Brugerens telefonnummer."
+      },
+      "role": {
+        "type": "integer",
+        "description": "Brugerens rolle i systemet."
+      },
+      "username": {
+        "type": "string",
+        "description": "Brugerens brugernavn."
+      },
+      "password": {
+        "type": "string",
+        "description": "Brugerens password (hashed)."
+      },
+      "Salt": {
+        "type": "string",
+        "description": "Salt til hash af password."
+      }
+    },
+    "required": ["_id","role", "email", "username", "password","Salt"],
+    "additionalProperties": false
+  }
+  
