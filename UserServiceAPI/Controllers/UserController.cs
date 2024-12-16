@@ -136,7 +136,7 @@ namespace UserServiceAPI.Controllers
         {
             var properties = new Dictionary<string, string>();
             var assembly = typeof(Program).Assembly;
-            properties.Add("service", "qgt-customer-service");
+            properties.Add("service", "UserService");
             var ver = FileVersionInfo.GetVersionInfo(typeof(Program)
             .Assembly.Location).ProductVersion;
             properties.Add("version", ver!);
