@@ -67,6 +67,7 @@ namespace UserServiceAPI.Controllers
 
         // POST: /api/user
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<Guid>> AddUser(User user)
         {
             _logger.LogInformation("Adding new user: {@User}", user);
