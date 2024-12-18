@@ -65,7 +65,7 @@ namespace UserServiceAPI.Controllers
             return Ok(userList);
         }
 
-        // POST: /api/user
+        // POST: /api/user/create-user
         [HttpPost("create-user")]
         public async Task<ActionResult<Guid>> AddUser(User user)
         {
